@@ -1,5 +1,5 @@
 from PyPDF2 import PdfReader
-import re
+import re, csv, os
 
 resolucion = {'fecha':'',
         'numero':'',
@@ -10,7 +10,7 @@ resolucion = {'fecha':'',
         }
 texto = []
 # Abre el archivo PDF
-reader = PdfReader("resoluciones/rsc-2020-05906591-gdeba-dgcye.pdf")
+reader = PdfReader("resoluciones/EX–2022-42817554-GDEBA-SDCADDGCYE - Calendario Escolar 2023.pdf")
 for page in reader.pages:
     texto.append(page.extract_text())
 
@@ -30,10 +30,17 @@ resolucion['visto'] = extraer_seccion(texto_unico, 'VISTO', 'CONSIDERANDO')
 resolucion['considerando'] = extraer_seccion(texto_unico, 'CONSIDERANDO', 'Por ello;')
 resolucion['articulos'] = extraer_seccion(texto_unico, 'ARTÍCULO 1°', 'archivar.')  
 
-# Impresión de resultados
-print("Número:", resolucion['numero'])
-print("Referencia:", resolucion['referencia'])
-print("VISTO:", resolucion['visto'])
-print("CONSIDERANDO:", resolucion['considerando'])
-print("ARTÍCULOS:", resolucion['articulos'])
+csv_filename = 'resoluciones.csv'
+file_exists = os.path.exists(csv_filename)
+# Escribir los datos en un archivo CSV
+with open(csv_filename, mode='a', newline='', encoding='utf-8') as csvfile:
+    fieldnames = ['fecha', 'numero', 'referencia', 'visto', 'considerando', 'articulos']
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=";")
+
+    # Escribir el encabezado solo si el archivo no existía previamente
+    if not file_exists:
+        writer.writeheader()
+    
+    # Escribir los datos de la nueva resolución
+    writer.writerow(resolucion)
 
